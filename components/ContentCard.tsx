@@ -217,7 +217,7 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
           {content.numberOfSeasons != null && (
             <span>{content.numberOfSeasons}시즌</span>
           )}
-          {content.runtime != null && content.runtime > 0 && (
+          {content.contentType === 'movie' && content.runtime != null && content.runtime > 0 && (
             <span>{formatRuntime(content.runtime)}</span>
           )}
         </div>
