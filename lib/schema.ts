@@ -18,5 +18,6 @@ export const preferences = sqliteTable('preferences', {
   ottPlatforms: text('ott_platforms').notNull().default('[]'),
   yearFrom: integer('year_from'),
   yearTo: integer('year_to'),
+  koreanOnly: integer('korean_only').notNull().default(0),
   updatedAt: integer('updated_at').notNull(),
 })

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { CuratedContent, Category } from '@/lib/tmdb'
+import { cn } from '@/lib/utils'
 import { CategoryTabs } from './CategoryTabs'
 import { OttFilterBar } from './OttFilterBar'
 import { YearRangeSlider } from './YearRangeSlider'
@@ -15,6 +16,7 @@ export function CurationApp() {
   const [category, setCategory] = useState<Category>('drama')
   const [ottPlatforms, setOttPlatforms] = useState<number[]>([])
   const [yearRange, setYearRange] = useState<[number, number] | null>(null)
+  const [koreanOnly, setKoreanOnly] = useState(false)
   const [contents, setContents] = useState<CuratedContent[]>([])
   const [watchedSet, setWatchedSet] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
@@ -35,9 +37,10 @@ export function CurationApp() {
       const [prefJson, watchedJson] = await Promise.all([prefRes.json(), watchedRes.json()])
 
       if (prefJson.success && prefJson.data) {
-        const { ottPlatforms: saved, yearFrom, yearTo } = prefJson.data
+        const { ottPlatforms: saved, yearFrom, yearTo, koreanOnly: savedKorean } = prefJson.data
         if (saved?.length) setOttPlatforms(saved)
         if (yearFrom != null && yearTo != null) setYearRange([yearFrom, yearTo])
+        if (savedKorean) setKoreanOnly(true)
       }
 
       if (watchedJson.success && Array.isArray(watchedJson.data)) {
@@ -62,13 +65,14 @@ export function CurationApp() {
         params.set('yearFrom', String(yearRange[0]))
         params.set('yearTo', String(yearRange[1]))
       }
+      if (koreanOnly) params.set('koreanOnly', 'true')
       const res = await fetch(`/api/curate?${params}`)
       const json = await res.json()
       if (json.success) setContents(json.data)
     } finally {
       setLoading(false)
     }
-  }, [category, ottPlatforms, yearRange])
+  }, [category, ottPlatforms, yearRange, koreanOnly])
 
   // Curate on first load and when filters change
   useEffect(() => {
@@ -77,7 +81,7 @@ export function CurationApp() {
   }, [prefLoaded, curate])
 
   // Debounced preference save
-  function savePreferences(platforms: number[], range: [number, number] | null) {
+  function savePreferences(platforms: number[], range: [number, number] | null, korean: boolean) {
     if (prefSaveTimer.current) clearTimeout(prefSaveTimer.current)
     prefSaveTimer.current = setTimeout(() => {
       fetch('/api/preferences', {
@@ -87,6 +91,7 @@ export function CurationApp() {
           ottPlatforms: platforms,
           yearFrom: range?.[0] ?? null,
           yearTo: range?.[1] ?? null,
+          koreanOnly: korean,
         }),
       })
     }, PREF_SAVE_DEBOUNCE_MS)
@@ -94,12 +99,18 @@ export function CurationApp() {
 
   function handleOttChange(platforms: number[]) {
     setOttPlatforms(platforms)
-    savePreferences(platforms, yearRange)
+    savePreferences(platforms, yearRange, koreanOnly)
   }
 
   function handleYearChange(range: [number, number] | null) {
     setYearRange(range)
-    savePreferences(ottPlatforms, range)
+    savePreferences(ottPlatforms, range, koreanOnly)
+  }
+
+  function handleKoreanOnlyChange() {
+    const next = !koreanOnly
+    setKoreanOnly(next)
+    savePreferences(ottPlatforms, yearRange, next)
   }
 
   function handleWatched(contentId: number, contentType: string) {
@@ -129,7 +140,20 @@ export function CurationApp() {
       {/* Filters */}
       <div className="max-w-6xl mx-auto px-4 pt-6 pb-4 space-y-4">
         <CategoryTabs value={category} onChange={setCategory} />
-        <OttFilterBar selected={ottPlatforms} onChange={handleOttChange} />
+        <div className="flex items-center gap-4 flex-wrap">
+          <OttFilterBar selected={ottPlatforms} onChange={handleOttChange} />
+          <button
+            onClick={handleKoreanOnlyChange}
+            className={cn(
+              'h-8 px-3 text-xs font-semibold rounded-full border transition-all duration-200 shrink-0',
+              koreanOnly
+                ? 'bg-amber-500 border-amber-500 text-black'
+                : 'bg-transparent border-zinc-700 text-zinc-400 hover:border-zinc-500'
+            )}
+          >
+            🇰🇷 한국 콘텐츠 우선
+          </button>
+        </div>
         <div className="max-w-sm">
           <YearRangeSlider value={yearRange} onChange={handleYearChange} />
         </div>

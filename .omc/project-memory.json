@@ -133,6 +133,30 @@
   },
   "hotPaths": [
     {
+      "path": "components/CurationApp.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1779639548673,
+      "type": "file"
+    },
+    {
+      "path": "lib/tmdb.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779639482100,
+      "type": "file"
+    },
+    {
+      "path": "app/api/curate/route.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779639490822,
+      "type": "file"
+    },
+    {
+      "path": "app/api/preferences/route.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779639507271,
+      "type": "file"
+    },
+    {
       "path": "app/layout.tsx",
       "accessCount": 3,
       "lastAccessed": 1779638841382,
@@ -151,6 +175,18 @@
       "type": "file"
     },
     {
+      "path": "lib/schema.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779639470371,
+      "type": "file"
+    },
+    {
+      "path": "lib/db.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779639473003,
+      "type": "file"
+    },
+    {
       "path": "next.config.ts",
       "accessCount": 2,
       "lastAccessed": 1779638590626,
@@ -163,21 +199,15 @@
       "type": "file"
     },
     {
+      "path": "lib/ai.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779639288276,
+      "type": "file"
+    },
+    {
       "path": "package.json",
       "accessCount": 1,
       "lastAccessed": 1779638324008,
-      "type": "file"
-    },
-    {
-      "path": "lib/schema.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638597261,
-      "type": "file"
-    },
-    {
-      "path": "lib/db.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638602515,
       "type": "file"
     },
     {
@@ -187,33 +217,9 @@
       "type": "file"
     },
     {
-      "path": "lib/tmdb.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638629902,
-      "type": "file"
-    },
-    {
-      "path": "lib/ai.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638641746,
-      "type": "file"
-    },
-    {
-      "path": "app/api/curate/route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638658052,
-      "type": "file"
-    },
-    {
       "path": "app/api/watched/route.ts",
       "accessCount": 1,
       "lastAccessed": 1779638666217,
-      "type": "file"
-    },
-    {
-      "path": "app/api/preferences/route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638672297,
       "type": "file"
     },
     {
@@ -238,12 +244,6 @@
       "path": "components/RefreshButton.tsx",
       "accessCount": 1,
       "lastAccessed": 1779638808898,
-      "type": "file"
-    },
-    {
-      "path": "components/CurationApp.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1779638832415,
       "type": "file"
     }
   ],

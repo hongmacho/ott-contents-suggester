@@ -28,6 +28,7 @@ export async function GET() {
         ottPlatforms: JSON.parse(pref.ottPlatforms) as number[],
         yearFrom: pref.yearFrom,
         yearTo: pref.yearTo,
+        koreanOnly: pref.koreanOnly === 1,
       },
     })
   } catch (error: unknown) {
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
     const ottPlatforms: number[] = Array.isArray(body.ottPlatforms) ? body.ottPlatforms : []
     const yearFrom: number | null = body.yearFrom ?? null
     const yearTo: number | null = body.yearTo ?? null
+    const koreanOnly: number = body.koreanOnly ? 1 : 0
 
     const { sessionId } = await getOrCreateSession()
     const db = getDb()
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
         ottPlatforms: JSON.stringify(ottPlatforms),
         yearFrom,
         yearTo,
+        koreanOnly,
         updatedAt: Date.now(),
       })
       .onConflictDoUpdate({
@@ -60,6 +63,7 @@ export async function POST(request: NextRequest) {
           ottPlatforms: JSON.stringify(ottPlatforms),
           yearFrom,
           yearTo,
+          koreanOnly,
           updatedAt: Date.now(),
         },
       })

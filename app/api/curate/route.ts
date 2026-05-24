@@ -16,9 +16,10 @@ export async function GET(request: NextRequest) {
       ? (categoryParam as Category)
       : 'drama'
 
-    const ottsParam = searchParams.get('otts') ?? ''
+    const ottsParam = searchParams.get('ottPlatforms') ?? ''
     const yearFromParam = searchParams.get('yearFrom')
     const yearToParam = searchParams.get('yearTo')
+    const koreanOnly = searchParams.get('koreanOnly') === 'true'
 
     const providerIds = ottsParam
       ? ottsParam.split(',').map(Number).filter((n) => !isNaN(n) && n > 0)
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
       providerIds,
       yearFrom,
       yearTo,
+      koreanOnly,
       watchedIds,
     })
 

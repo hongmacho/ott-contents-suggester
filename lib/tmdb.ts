@@ -72,9 +72,10 @@ export async function discoverContent(params: {
   providerIds: number[]
   yearFrom?: number
   yearTo?: number
+  koreanOnly?: boolean
   watchedIds: number[]
 }): Promise<Omit<CuratedContent, 'recommendationReason'>[]> {
-  const { category, providerIds, yearFrom, yearTo, watchedIds } = params
+  const { category, providerIds, yearFrom, yearTo, koreanOnly, watchedIds } = params
   const config = CATEGORY_CONFIG[category]
   const apiKey = process.env.TMDB_API_KEY
 
@@ -93,6 +94,7 @@ export async function discoverContent(params: {
   }
 
   if (config.genres) baseParams['with_genres'] = config.genres
+  if (koreanOnly) baseParams['with_original_language'] = 'ko'
 
   if (yearFrom) {
     baseParams[isMovie ? 'primary_release_date.gte' : 'first_air_date.gte'] = `${yearFrom}-01-01`

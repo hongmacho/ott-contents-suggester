@@ -31,9 +31,13 @@ function createDrizzle() {
       ott_platforms TEXT NOT NULL DEFAULT '[]',
       year_from INTEGER,
       year_to INTEGER,
+      korean_only INTEGER NOT NULL DEFAULT 0,
       updated_at INTEGER NOT NULL
     );
   `)
+
+  // migrate existing tables
+  try { sqlite.exec(`ALTER TABLE preferences ADD COLUMN korean_only INTEGER NOT NULL DEFAULT 0`) } catch { /* already exists */ }
 
   return drizzle(sqlite, { schema })
 }
