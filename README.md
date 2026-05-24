@@ -72,7 +72,7 @@ flowchart TD
 |-------|-----------|
 | Framework | Next.js 16 (App Router) |
 | UI | shadcn/ui · Tailwind CSS |
-| Database | SQLite (better-sqlite3) · Drizzle ORM |
+| Database | Neon PostgreSQL · Drizzle ORM |
 | Content API | TMDb API v3 |
 | AI Reasoning | Anthropic Claude Haiku (optional) |
 
@@ -82,6 +82,8 @@ flowchart TD
 
 - Node.js 20+
 - TMDb API 키 ([발급](https://www.themoviedb.org/settings/api))
+- Neon PostgreSQL 프로젝트 ([생성](https://neon.tech))
+- Google OAuth 앱 ([생성](https://console.cloud.google.com) → API 및 서비스 → 사용자 인증 정보)
 - Anthropic API 키 ([발급](https://console.anthropic.com)) — 없으면 평점 기반 폴백 동작
 
 ### Installation
@@ -89,14 +91,19 @@ flowchart TD
 ```bash
 npm install
 cp .env.example .env.local
-# .env.local에 API 키 입력
+# .env.local에 아래 환경변수 입력
+npx drizzle-kit push   # DB 스키마 생성
 ```
 
 ### Environment Variables
 
 ```
-TMDB_API_KEY=your_tmdb_api_key          # 필수
-ANTHROPIC_API_KEY=your_anthropic_api_key # 선택 (없으면 폴백)
+TMDB_API_KEY=           # 필수 — TMDb API 키
+DATABASE_URL=           # 필수 — Neon PostgreSQL Connection String
+AUTH_SECRET=            # 필수 — npx auth secret 으로 생성
+GOOGLE_CLIENT_ID=       # 필수 — Google OAuth 클라이언트 ID
+GOOGLE_CLIENT_SECRET=   # 필수 — Google OAuth 클라이언트 시크릿
+ANTHROPIC_API_KEY=      # 선택 — 없으면 평점 기반 폴백
 ```
 
 ### Run
