@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrCreateSession } from '@/lib/session'
 import { getDb } from '@/lib/db'
-import { watchedContents } from '@/lib/schema'
+import { skippedContents } from '@/lib/schema'
 import { eq, and } from 'drizzle-orm'
 
 export async function GET() {
@@ -9,18 +9,18 @@ export async function GET() {
     const { sessionId } = await getOrCreateSession()
     const db = getDb()
 
-    const watched = db
+    const skipped = db
       .select({
-        contentId: watchedContents.contentId,
-        contentType: watchedContents.contentType,
-        title: watchedContents.title,
-        posterPath: watchedContents.posterPath,
+        contentId: skippedContents.contentId,
+        contentType: skippedContents.contentType,
+        title: skippedContents.title,
+        posterPath: skippedContents.posterPath,
       })
-      .from(watchedContents)
-      .where(eq(watchedContents.sessionId, sessionId))
+      .from(skippedContents)
+      .where(eq(skippedContents.sessionId, sessionId))
       .all()
 
-    return NextResponse.json({ success: true, data: watched })
+    return NextResponse.json({ success: true, data: skipped })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { sessionId } = await getOrCreateSession()
     const db = getDb()
 
-    db.insert(watchedContents)
+    db.insert(skippedContents)
       .values({
         sessionId,
         contentId: Number(contentId),
@@ -71,12 +71,12 @@ export async function DELETE(request: NextRequest) {
     const { sessionId } = await getOrCreateSession()
     const db = getDb()
 
-    db.delete(watchedContents)
+    db.delete(skippedContents)
       .where(
         and(
-          eq(watchedContents.sessionId, sessionId),
-          eq(watchedContents.contentId, contentId),
-          eq(watchedContents.contentType, contentType)
+          eq(skippedContents.sessionId, sessionId),
+          eq(skippedContents.contentId, contentId),
+          eq(skippedContents.contentType, contentType)
         )
       )
       .run()

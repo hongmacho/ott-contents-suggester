@@ -26,7 +26,7 @@ export function YearRangeSlider({ value, onChange }: YearRangeSliderProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between text-sm">
         <span className="text-zinc-500">출시 연도</span>
         <span className={isFiltered ? 'text-amber-400 font-medium' : 'text-zinc-500'}>
           {isFiltered ? `${current[0]} ~ ${current[1]}년` : '전체 연도'}
@@ -41,7 +41,7 @@ export function YearRangeSlider({ value, onChange }: YearRangeSliderProps) {
         minStepsBetweenValues={1}
         className="w-full"
       />
-      <div className="flex justify-between text-[10px] text-zinc-600">
+      <div className="flex justify-between text-xs text-zinc-600">
         <span>{MIN_YEAR}</span>
         <span>{MAX_YEAR}</span>
       </div>

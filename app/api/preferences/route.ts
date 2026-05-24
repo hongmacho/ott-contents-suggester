@@ -18,7 +18,7 @@ export async function GET() {
     if (!pref) {
       return NextResponse.json({
         success: true,
-        data: { ottPlatforms: [], yearFrom: null, yearTo: null },
+        data: { ottPlatforms: [], yearFrom: null, yearTo: null, originLanguages: [], excludeAnimation: false },
       })
     }
 
@@ -28,7 +28,8 @@ export async function GET() {
         ottPlatforms: JSON.parse(pref.ottPlatforms) as number[],
         yearFrom: pref.yearFrom,
         yearTo: pref.yearTo,
-        koreanOnly: pref.koreanOnly === 1,
+        originLanguages: JSON.parse(pref.originLanguages ?? '[]') as string[],
+        excludeAnimation: pref.excludeAnimation === 1,
       },
     })
   } catch (error: unknown) {
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
     const ottPlatforms: number[] = Array.isArray(body.ottPlatforms) ? body.ottPlatforms : []
     const yearFrom: number | null = body.yearFrom ?? null
     const yearTo: number | null = body.yearTo ?? null
-    const koreanOnly: number = body.koreanOnly ? 1 : 0
+    const originLanguages: string[] = Array.isArray(body.originLanguages) ? body.originLanguages : []
+    const excludeAnimation: number = body.excludeAnimation ? 1 : 0
 
     const { sessionId } = await getOrCreateSession()
     const db = getDb()
@@ -54,7 +56,8 @@ export async function POST(request: NextRequest) {
         ottPlatforms: JSON.stringify(ottPlatforms),
         yearFrom,
         yearTo,
-        koreanOnly,
+        originLanguages: JSON.stringify(originLanguages),
+        excludeAnimation,
         updatedAt: Date.now(),
       })
       .onConflictDoUpdate({
@@ -63,7 +66,8 @@ export async function POST(request: NextRequest) {
           ottPlatforms: JSON.stringify(ottPlatforms),
           yearFrom,
           yearTo,
-          koreanOnly,
+          originLanguages: JSON.stringify(originLanguages),
+          excludeAnimation,
           updatedAt: Date.now(),
         },
       })

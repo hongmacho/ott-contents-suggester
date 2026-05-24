@@ -18,12 +18,12 @@ const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
 export function CategoryTabs({ value, onChange }: CategoryTabsProps) {
   return (
     <Tabs value={value} onValueChange={(v) => onChange(v as Category)}>
-      <TabsList className="bg-zinc-900 border border-zinc-800 p-1 h-auto gap-1">
+      <TabsList className="bg-zinc-900 border border-zinc-800 p-1 h-auto gap-1 w-full sm:w-auto">
         {CATEGORIES.map((cat) => (
           <TabsTrigger
             key={cat.value}
             value={cat.value}
-            className="data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400 hover:text-white transition-colors px-4 py-2 text-sm rounded-md"
+            className="flex-1 sm:flex-none data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400 hover:text-white transition-colors px-3 sm:px-4 py-2 text-sm rounded-md"
           >
             <span className="mr-1.5">{cat.emoji}</span>
             {cat.label}

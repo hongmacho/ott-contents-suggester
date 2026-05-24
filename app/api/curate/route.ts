@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrCreateSession } from '@/lib/session'
 import { getDb } from '@/lib/db'
-import { watchedContents } from '@/lib/schema'
+import { watchedContents, skippedContents } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import { discoverContent, type Category } from '@/lib/tmdb'
+import { discoverContent, type Category, type OriginLanguage } from '@/lib/tmdb'
 import { generateRecommendationReason } from '@/lib/ai'
 
 const VALID_CATEGORIES: Category[] = ['drama', 'variety', 'documentary', 'movie']
+const VALID_LANGUAGES: OriginLanguage[] = ['ko', 'ja', 'zh', 'en', 'other']
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,32 +20,40 @@ export async function GET(request: NextRequest) {
     const ottsParam = searchParams.get('ottPlatforms') ?? ''
     const yearFromParam = searchParams.get('yearFrom')
     const yearToParam = searchParams.get('yearTo')
-    const koreanOnly = searchParams.get('koreanOnly') === 'true'
+    const langsParam = searchParams.get('originLanguages') ?? ''
+    const excludeAnimationParam = searchParams.get('excludeAnimation')
+    const pageParam = searchParams.get('page')
 
     const providerIds = ottsParam
       ? ottsParam.split(',').map(Number).filter((n) => !isNaN(n) && n > 0)
       : []
     const yearFrom = yearFromParam ? parseInt(yearFromParam) : undefined
     const yearTo = yearToParam ? parseInt(yearToParam) : undefined
+    const originLanguages: OriginLanguage[] = langsParam
+      ? (langsParam.split(',').filter((l) => VALID_LANGUAGES.includes(l as OriginLanguage)) as OriginLanguage[])
+      : []
+    const excludeAnimation = excludeAnimationParam === '1'
+    const page = pageParam ? Math.max(1, parseInt(pageParam)) : 1
 
     const { sessionId } = await getOrCreateSession()
     const db = getDb()
 
-    const watched = db
-      .select({ contentId: watchedContents.contentId })
-      .from(watchedContents)
-      .where(eq(watchedContents.sessionId, sessionId))
-      .all()
+    const [watched, skipped] = [
+      db.select({ contentId: watchedContents.contentId }).from(watchedContents).where(eq(watchedContents.sessionId, sessionId)).all(),
+      db.select({ contentId: skippedContents.contentId }).from(skippedContents).where(eq(skippedContents.sessionId, sessionId)).all(),
+    ]
 
-    const watchedIds = watched.map((w) => w.contentId)
+    const excludedIds = [...new Set([...watched.map((w) => w.contentId), ...skipped.map((s) => s.contentId)])]
 
     const contents = await discoverContent({
       category,
       providerIds,
       yearFrom,
       yearTo,
-      koreanOnly,
-      watchedIds,
+      originLanguages,
+      excludeAnimation,
+      watchedIds: excludedIds,
+      page,
     })
 
     const withReasons = await Promise.all(

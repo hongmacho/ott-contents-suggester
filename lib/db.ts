@@ -26,18 +26,31 @@ function createDrizzle() {
       created_at INTEGER NOT NULL,
       UNIQUE(session_id, content_id, content_type)
     );
+    CREATE TABLE IF NOT EXISTS skipped_contents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT NOT NULL,
+      content_id INTEGER NOT NULL,
+      content_type TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      UNIQUE(session_id, content_id, content_type)
+    );
     CREATE TABLE IF NOT EXISTS preferences (
       session_id TEXT PRIMARY KEY,
       ott_platforms TEXT NOT NULL DEFAULT '[]',
       year_from INTEGER,
       year_to INTEGER,
-      korean_only INTEGER NOT NULL DEFAULT 0,
+      origin_languages TEXT NOT NULL DEFAULT '[]',
       updated_at INTEGER NOT NULL
     );
   `)
 
   // migrate existing tables
-  try { sqlite.exec(`ALTER TABLE preferences ADD COLUMN korean_only INTEGER NOT NULL DEFAULT 0`) } catch { /* already exists */ }
+  try { sqlite.exec(`ALTER TABLE preferences ADD COLUMN origin_languages TEXT NOT NULL DEFAULT '[]'`) } catch { /* already exists */ }
+  try { sqlite.exec(`ALTER TABLE preferences ADD COLUMN exclude_animation INTEGER NOT NULL DEFAULT 0`) } catch { /* already exists */ }
+  try { sqlite.exec(`ALTER TABLE watched_contents ADD COLUMN title TEXT NOT NULL DEFAULT ''`) } catch { /* already exists */ }
+  try { sqlite.exec(`ALTER TABLE watched_contents ADD COLUMN poster_path TEXT`) } catch { /* already exists */ }
+  try { sqlite.exec(`ALTER TABLE skipped_contents ADD COLUMN title TEXT NOT NULL DEFAULT ''`) } catch { /* already exists */ }
+  try { sqlite.exec(`ALTER TABLE skipped_contents ADD COLUMN poster_path TEXT`) } catch { /* already exists */ }
 
   return drizzle(sqlite, { schema })
 }
