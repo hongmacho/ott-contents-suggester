@@ -29,20 +29,19 @@ const PROVIDER_COLORS: Record<string, string> = {
 
 export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip }: ContentCardProps) {
   const [hovering, setHovering] = useState(false)
-  const [watchLoading, setWatchLoading] = useState(false)
 
   const imageUrl = tmdbImageUrl(content.posterPath)
 
-  async function handleWatchedToggle() {
-    setWatchLoading(true)
+  function handleWatchedToggle() {
     if (isWatched) {
-      await fetch(
+      onUnwatched(content.contentId, content.contentType)
+      fetch(
         `/api/watched?contentId=${content.contentId}&contentType=${content.contentType}`,
         { method: 'DELETE' }
       )
-      onUnwatched(content.contentId, content.contentType)
     } else {
-      await fetch('/api/watched', {
+      onWatched(content.contentId, content.contentType)
+      fetch('/api/watched', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -52,9 +51,7 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
           posterPath: content.posterPath,
         }),
       })
-      onWatched(content.contentId, content.contentType)
     }
-    setWatchLoading(false)
   }
 
   return (
@@ -127,8 +124,7 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
               <div className="flex gap-1.5 pt-1">
                 <button
                   onClick={handleWatchedToggle}
-                  disabled={watchLoading}
-                  className="flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-sm font-semibold bg-amber-500/90 border border-amber-400 text-black hover:bg-amber-400/90 transition-colors"
+                                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-sm font-semibold bg-amber-500/90 border border-amber-400 text-black hover:bg-amber-400/90 transition-colors"
                 >
                   <Eye size={13} />
                   봤어요
@@ -153,8 +149,7 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
           >
             <button
               onClick={handleWatchedToggle}
-              disabled={watchLoading}
-              className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-xs font-semibold bg-amber-500/90 border border-amber-400 text-black active:bg-amber-400"
+                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-xs font-semibold bg-amber-500/90 border border-amber-400 text-black active:bg-amber-400"
             >
               <Eye size={11} />
               봤어요
@@ -174,8 +169,7 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
           <div className="absolute bottom-0 inset-x-0 px-2 pb-3 flex">
             <button
               onClick={handleWatchedToggle}
-              disabled={watchLoading}
-              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-sm font-semibold backdrop-blur-sm bg-zinc-700/80 border border-zinc-600 text-zinc-300 hover:bg-zinc-600/80 transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-sm font-semibold backdrop-blur-sm bg-zinc-700/80 border border-zinc-600 text-zinc-300 hover:bg-zinc-600/80 transition-colors"
             >
               <EyeOff size={13} />
               취소
