@@ -20,6 +20,15 @@ function formatVoteCount(count: number): string {
   return String(count)
 }
 
+function formatRuntime(minutes: number): string {
+  if (minutes >= 60) {
+    const h = Math.floor(minutes / 60)
+    const m = minutes % 60
+    return m > 0 ? `${h}시간 ${m}분` : `${h}시간`
+  }
+  return `${minutes}분`
+}
+
 const PROVIDER_COLORS: Record<string, string> = {
   Netflix: 'bg-red-600',
   Tving: 'bg-rose-500',
@@ -207,6 +216,9 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
           {content.releaseYear > 0 && <span>{content.releaseYear}년</span>}
           {content.numberOfSeasons != null && (
             <span>{content.numberOfSeasons}시즌</span>
+          )}
+          {content.runtime != null && content.runtime > 0 && (
+            <span>{formatRuntime(content.runtime)}</span>
           )}
         </div>
 

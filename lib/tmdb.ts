@@ -14,6 +14,7 @@ export interface CuratedContent {
   providers: string[]
   genres: string[]
   numberOfSeasons?: number
+  runtime?: number
   cast: string[]
   director?: string
   awards?: string[]
@@ -60,6 +61,7 @@ interface TmdbCreatedBy {
 interface TmdbTvDetails {
   number_of_seasons: number
   number_of_episodes: number
+  episode_run_time: number[]
   created_by: TmdbCreatedBy[]
   credits: TmdbCredits
   keywords: TmdbTvKeywords
@@ -71,6 +73,7 @@ interface TmdbKeyword {
 }
 
 interface TmdbMovieDetails {
+  runtime: number | null
   credits: TmdbCredits
   keywords: { keywords: TmdbKeyword[] }
 }
@@ -311,7 +314,7 @@ export async function discoverContent(params: {
     top12.sort((a, b) => b.score - a.score)
   }
 
-  const detailMap = new Map<number, { seasons?: number; cast: string[]; director?: string; awards: string[] }>()
+  const detailMap = new Map<number, { seasons?: number; runtime?: number; cast: string[]; director?: string; awards: string[] }>()
   await Promise.all(
     top12.map(async ({ item }) => {
       const endpoint = isMovie
@@ -328,7 +331,8 @@ export async function discoverContent(params: {
           .slice(0, 3)
           .map((c) => c.name)
         const awards = parseAwards(d.keywords?.keywords ?? [])
-        detailMap.set(item.id, { cast, director, awards })
+        const runtime = d.runtime ?? undefined
+        detailMap.set(item.id, { cast, director, awards, runtime })
       } else {
         const d = await r.json() as TmdbTvDetails
         const director = d.created_by?.[0]?.name
@@ -337,7 +341,8 @@ export async function discoverContent(params: {
           .slice(0, 3)
           .map((c) => c.name)
         const awards = parseAwards(d.keywords?.results ?? [])
-        detailMap.set(item.id, { seasons: d.number_of_seasons, cast, director, awards })
+        const runtime = d.episode_run_time?.[0] ?? undefined
+        detailMap.set(item.id, { seasons: d.number_of_seasons, cast, director, awards, runtime })
       }
     })
   )
@@ -373,6 +378,7 @@ export async function discoverContent(params: {
       providers,
       genres: (item.genre_ids ?? []).map((id) => GENRE_NAMES[id]).filter(Boolean),
       numberOfSeasons: detail?.seasons,
+      runtime: detail?.runtime,
       cast: detail?.cast ?? [],
       director: detail?.director,
       awards: detail?.awards?.length ? detail.awards : undefined,

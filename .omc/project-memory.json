@@ -42,7 +42,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npm run build 2>&1",
+    "buildCommand": "npx tsc --noEmit 2>&1",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": "npm run dev",
@@ -134,56 +134,140 @@
   "hotPaths": [
     {
       "path": "components/CurationApp.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1779639548673,
+      "accessCount": 68,
+      "lastAccessed": 1779650868575,
       "type": "file"
     },
     {
       "path": "lib/tmdb.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779639482100,
+      "accessCount": 51,
+      "lastAccessed": 1779651018788,
       "type": "file"
     },
     {
       "path": "app/api/curate/route.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779639490822,
+      "accessCount": 27,
+      "lastAccessed": 1779650789776,
       "type": "file"
     },
     {
-      "path": "app/api/preferences/route.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779639507271,
-      "type": "file"
-    },
-    {
-      "path": "app/layout.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1779638841382,
-      "type": "file"
-    },
-    {
-      "path": "app/page.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1779638847189,
-      "type": "file"
-    },
-    {
-      "path": "components/YearRangeSlider.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1779638880507,
-      "type": "file"
-    },
-    {
-      "path": "lib/schema.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779639470371,
+      "path": "components/ContentCard.tsx",
+      "accessCount": 26,
+      "lastAccessed": 1779651031463,
       "type": "file"
     },
     {
       "path": "lib/db.ts",
+      "accessCount": 17,
+      "lastAccessed": 1779649713714,
+      "type": "file"
+    },
+    {
+      "path": "lib/schema.ts",
+      "accessCount": 15,
+      "lastAccessed": 1779646928571,
+      "type": "file"
+    },
+    {
+      "path": "app/api/preferences/route.ts",
+      "accessCount": 14,
+      "lastAccessed": 1779650001366,
+      "type": "file"
+    },
+    {
+      "path": "components/CountryFilter.tsx",
+      "accessCount": 11,
+      "lastAccessed": 1779650732744,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 10,
+      "lastAccessed": 1779649494639,
+      "type": "file"
+    },
+    {
+      "path": "app/api/watched/route.ts",
+      "accessCount": 9,
+      "lastAccessed": 1779648558334,
+      "type": "file"
+    },
+    {
+      "path": "components/YearRangeSlider.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1779648924305,
+      "type": "file"
+    },
+    {
+      "path": "components/OttFilterBar.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1779648798725,
+      "type": "file"
+    },
+    {
+      "path": "app/api/skipped/route.ts",
+      "accessCount": 7,
+      "lastAccessed": 1779648560058,
+      "type": "file"
+    },
+    {
+      "path": "components/ExcludedPage.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1779649014614,
+      "type": "file"
+    },
+    {
+      "path": "app/page.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1779649200854,
+      "type": "file"
+    },
+    {
+      "path": "app/globals.css",
+      "accessCount": 6,
+      "lastAccessed": 1779649127168,
+      "type": "file"
+    },
+    {
+      "path": "components/CategoryTabs.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1779648771626,
+      "type": "file"
+    },
+    {
+      "path": "app/layout.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1779648865005,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 4,
+      "lastAccessed": 1779640387774,
+      "type": "file"
+    },
+    {
+      "path": "lib/session.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779647175085,
+      "type": "file"
+    },
+    {
+      "path": ".env.example",
+      "accessCount": 4,
+      "lastAccessed": 1779649478430,
+      "type": "file"
+    },
+    {
+      "path": "auth.ts",
       "accessCount": 3,
-      "lastAccessed": 1779639473003,
+      "lastAccessed": 1779648184810,
+      "type": "file"
+    },
+    {
+      "path": "scripts/restore-backup.mjs",
+      "accessCount": 3,
+      "lastAccessed": 1779648421806,
       "type": "file"
     },
     {
@@ -193,57 +277,57 @@
       "type": "file"
     },
     {
-      "path": "README.md",
-      "accessCount": 2,
-      "lastAccessed": 1779638961506,
-      "type": "file"
-    },
-    {
       "path": "lib/ai.ts",
       "accessCount": 2,
       "lastAccessed": 1779639288276,
       "type": "file"
     },
     {
-      "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1779638324008,
-      "type": "file"
-    },
-    {
-      "path": "lib/session.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638606064,
-      "type": "file"
-    },
-    {
-      "path": "app/api/watched/route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779638666217,
-      "type": "file"
-    },
-    {
-      "path": "components/ContentCard.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1779638696871,
-      "type": "file"
-    },
-    {
-      "path": "components/CategoryTabs.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1779638699838,
-      "type": "file"
-    },
-    {
-      "path": "components/OttFilterBar.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1779638707488,
+      "path": "drizzle.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779647589488,
       "type": "file"
     },
     {
       "path": "components/RefreshButton.tsx",
       "accessCount": 1,
       "lastAccessed": 1779638808898,
+      "type": "file"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "accessCount": 1,
+      "lastAccessed": 1779640392318,
+      "type": "file"
+    },
+    {
+      "path": "middleware.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779646944010,
+      "type": "file"
+    },
+    {
+      "path": "lib/auth-session.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779646945701,
+      "type": "file"
+    },
+    {
+      "path": "app/login/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779646976536,
+      "type": "file"
+    },
+    {
+      "path": "types/next-auth.d.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779646977667,
+      "type": "file"
+    },
+    {
+      "path": "components/GenreFilter.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779650804386,
       "type": "file"
     }
   ],
