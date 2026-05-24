@@ -79,7 +79,7 @@ interface TmdbTvKeywords {
   results: TmdbKeyword[]
 }
 
-const GENRE_NAMES: Record<number, string> = {
+export const GENRE_NAMES: Record<number, string> = {
   28: '액션', 12: '어드벤처', 16: '애니메이션', 35: '코미디', 80: '범죄',
   99: '다큐멘터리', 18: '드라마', 10751: '가족', 14: '판타지', 36: '역사',
   27: '공포', 10402: '음악', 9648: '미스터리', 10749: '로맨스', 878: 'SF',
@@ -188,9 +188,10 @@ export async function discoverContent(params: {
   originLanguages: OriginLanguage[]
   excludeAnimation?: boolean
   watchedIds: number[]
+  genreIds?: number[]
   page?: number
 }): Promise<{ items: Omit<CuratedContent, 'recommendationReason'>[]; hasMore: boolean }> {
-  const { category, providerIds, yearFrom, yearTo, originLanguages, excludeAnimation = false, watchedIds, page = 1 } = params
+  const { category, providerIds, yearFrom, yearTo, originLanguages, excludeAnimation = false, watchedIds, genreIds = [], page = 1 } = params
   const config = CATEGORY_CONFIG[category]
   const apiKey = process.env.TMDB_API_KEY
 
@@ -208,8 +209,17 @@ export async function discoverContent(params: {
     'vote_count.gte': '50',
   }
 
-  if (config.genres) baseParams['with_genres'] = config.genres
   if (excludeAnimation) baseParams['without_genres'] = '16'
+
+  // Build genre param sets: each user-selected genre becomes a separate request (OR via merge)
+  // combined with the category's base genre as AND (e.g., drama+romance, drama+thriller)
+  const genreParamSets: Record<string, string>[] = genreIds.length > 0
+    ? genreIds.map((id) => ({
+        with_genres: config.genres ? `${config.genres},${id}` : String(id),
+      }))
+    : config.genres
+      ? [{ with_genres: config.genres }]
+      : [{}]
 
   if (yearFrom) {
     baseParams[isMovie ? 'primary_release_date.gte' : 'first_air_date.gte'] = `${yearFrom}-01-01`
@@ -234,12 +244,14 @@ export async function discoverContent(params: {
 
   const fetchResults = await Promise.all(
     effectiveProviders.flatMap((providerId) =>
-      langParamSets.map((langParams) =>
-        fetchDiscover(
-          config.endpoint,
-          { ...baseParams, ...langParams, with_watch_providers: String(providerId) },
-          page
-        ).then((items) => ({ providerId, items }))
+      langParamSets.flatMap((langParams) =>
+        genreParamSets.map((genreParams) =>
+          fetchDiscover(
+            config.endpoint,
+            { ...baseParams, ...langParams, ...genreParams, with_watch_providers: String(providerId) },
+            page
+          ).then((items) => ({ providerId, items }))
+        )
       )
     )
   )

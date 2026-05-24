@@ -6,6 +6,7 @@ import { CategoryTabs } from './CategoryTabs'
 import { OttFilterBar } from './OttFilterBar'
 import { YearRangeSlider } from './YearRangeSlider'
 import { CountryFilter } from './CountryFilter'
+import { GenreFilter } from './GenreFilter'
 import { ContentCard } from './ContentCard'
 import { ExcludedPage } from './ExcludedPage'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -20,6 +21,7 @@ interface StoredPrefs {
   yearTo?: number | null
   originLanguages?: OriginLanguage[]
   excludeAnimation?: boolean
+  selectedGenres?: number[]
 }
 
 function loadStoredPrefs(): StoredPrefs | null {
@@ -42,6 +44,7 @@ export function CurationApp() {
   const [yearRange, setYearRange] = useState<[number, number] | null>(null)
   const [originLanguages, setOriginLanguages] = useState<OriginLanguage[]>([])
   const [excludeAnimation, setExcludeAnimation] = useState(false)
+  const [selectedGenres, setSelectedGenres] = useState<number[]>([])
   const [contents, setContents] = useState<CuratedContent[]>([])
   const [watchedSet, setWatchedSet] = useState<Set<string>>(new Set())
   const [skippedSet, setSkippedSet] = useState<Set<string>>(new Set())
@@ -53,11 +56,11 @@ export function CurationApp() {
   const pageRef = useRef(1)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const prefSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const filtersRef = useRef({ category, ottPlatforms, yearRange, originLanguages, excludeAnimation })
+  const filtersRef = useRef({ category, ottPlatforms, yearRange, originLanguages, excludeAnimation, selectedGenres })
 
   useEffect(() => {
-    filtersRef.current = { category, ottPlatforms, yearRange, originLanguages, excludeAnimation }
-  }, [category, ottPlatforms, yearRange, originLanguages, excludeAnimation])
+    filtersRef.current = { category, ottPlatforms, yearRange, originLanguages, excludeAnimation, selectedGenres }
+  }, [category, ottPlatforms, yearRange, originLanguages, excludeAnimation, selectedGenres])
 
   useEffect(() => {
     if (!prefLoaded) return
@@ -69,6 +72,7 @@ export function CurationApp() {
         yearTo: yearRange?.[1] ?? null,
         originLanguages,
         excludeAnimation,
+        selectedGenres,
       } satisfies StoredPrefs))
     } catch {
       // private mode 등 storage 불가 환경 무시
@@ -87,6 +91,9 @@ export function CurationApp() {
           setOriginLanguages(stored.originLanguages as OriginLanguage[])
         }
         if (stored.excludeAnimation) setExcludeAnimation(true)
+        if (Array.isArray(stored.selectedGenres) && stored.selectedGenres.length) {
+          setSelectedGenres(stored.selectedGenres)
+        }
       }
 
       // 2. 서버에서 watched/skipped + 필터 fallback 로드
@@ -132,7 +139,7 @@ export function CurationApp() {
   }, [])
 
   const buildParams = useCallback((page: number) => {
-    const { category: cat, ottPlatforms: otts, yearRange: yr, originLanguages: langs, excludeAnimation: excAnim } = filtersRef.current
+    const { category: cat, ottPlatforms: otts, yearRange: yr, originLanguages: langs, excludeAnimation: excAnim, selectedGenres: genres } = filtersRef.current
     const params = new URLSearchParams({ category: cat, page: String(page) })
     if (otts.length > 0) params.set('ottPlatforms', otts.join(','))
     if (yr) {
@@ -141,6 +148,7 @@ export function CurationApp() {
     }
     if (langs.length > 0) params.set('originLanguages', langs.join(','))
     if (excAnim) params.set('excludeAnimation', '1')
+    if (genres.length > 0) params.set('genreIds', genres.join(','))
     return params
   }, [])
 
@@ -188,7 +196,7 @@ export function CurationApp() {
   useEffect(() => {
     if (!prefLoaded) return
     curate()
-  }, [prefLoaded, category, ottPlatforms, yearRange, originLanguages, excludeAnimation, curate])
+  }, [prefLoaded, category, ottPlatforms, yearRange, originLanguages, excludeAnimation, selectedGenres, curate])
 
   // IntersectionObserver for infinite scroll
   // contents.length dep ensures observer is set up after first content render
@@ -243,6 +251,15 @@ export function CurationApp() {
   function handleExcludeAnimationChange(excAnim: boolean) {
     setExcludeAnimation(excAnim)
     savePreferences(ottPlatforms, yearRange, originLanguages, excAnim)
+  }
+
+  function handleCategoryChange(cat: Category) {
+    setCategory(cat)
+    setSelectedGenres([])
+  }
+
+  function handleGenreChange(genres: number[]) {
+    setSelectedGenres(genres)
   }
 
   function handleWatched(contentId: number, contentType: string) {
@@ -337,9 +354,10 @@ export function CurationApp() {
       ) : (
         <>
           <div className="max-w-6xl mx-auto px-4 pt-4 pb-3 space-y-3">
-            <CategoryTabs value={category} onChange={setCategory} />
+            <CategoryTabs value={category} onChange={handleCategoryChange} />
             <OttFilterBar selected={ottPlatforms} onChange={handleOttChange} />
             <CountryFilter value={originLanguages} onChange={handleOriginLanguagesChange} />
+            <GenreFilter category={category} value={selectedGenres} onChange={handleGenreChange} />
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex-1 sm:max-w-sm">
                 <YearRangeSlider value={yearRange} onChange={handleYearChange} />

@@ -34,6 +34,10 @@ export async function GET(request: NextRequest) {
       : []
     const excludeAnimation = excludeAnimationParam === '1'
     const page = pageParam ? Math.max(1, parseInt(pageParam)) : 1
+    const genreIdsParam = searchParams.get('genreIds') ?? ''
+    const genreIds = genreIdsParam
+      ? genreIdsParam.split(',').map(Number).filter((n) => !isNaN(n) && n > 0)
+      : []
 
     const userId = await getRequiredUserId()
     const db = getDb()
@@ -53,6 +57,7 @@ export async function GET(request: NextRequest) {
       originLanguages,
       excludeAnimation,
       watchedIds: excludedIds,
+      genreIds,
       page,
     })
 
