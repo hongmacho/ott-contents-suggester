@@ -1,6 +1,8 @@
-import { neon } from '@neondatabase/serverless'
+import { neon, neonConfig } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
 import * as schema from './schema'
+
+neonConfig.fetchConnectionCache = true
 
 declare global {
   // eslint-disable-next-line no-var
@@ -14,9 +16,6 @@ function createDrizzle() {
 }
 
 export function getDb() {
-  if (process.env.NODE_ENV === 'production') {
-    return createDrizzle()
-  }
   if (!global.__db) {
     global.__db = createDrizzle()
   }
