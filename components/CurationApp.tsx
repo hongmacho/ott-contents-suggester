@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { signOut } from 'next-auth/react'
 import type { CuratedContent, Category, OriginLanguage } from '@/lib/tmdb'
 import { CategoryTabs } from './CategoryTabs'
 import { OttFilterBar } from './OttFilterBar'
@@ -36,13 +35,7 @@ function watchedKey(contentId: number, contentType: string) {
   return `${contentType}:${contentId}`
 }
 
-interface UserInfo {
-  name?: string | null
-  email?: string | null
-  image?: string | null
-}
-
-export function CurationApp({ user }: { user: UserInfo | null }) {
+export function CurationApp() {
   const [view, setView] = useState<'main' | 'excluded'>('main')
   const [category, setCategory] = useState<Category>('drama')
   const [ottPlatforms, setOttPlatforms] = useState<number[]>([])
@@ -307,22 +300,6 @@ export function CurationApp({ user }: { user: UserInfo | null }) {
         <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:gap-3">
           <div className="flex items-center gap-3">
             <span className="text-lg font-black tracking-widest text-amber-400 shrink-0">HONGCHA</span>
-            <div className="ml-auto hidden sm:flex items-center gap-2">
-              {user?.image && (
-                <img
-                  src={user.image}
-                  alt={user.name ?? '사용자'}
-                  className="w-7 h-7 rounded-full"
-                  referrerPolicy="no-referrer"
-                />
-              )}
-              <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
-                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                로그아웃
-              </button>
-            </div>
           </div>
 
           <nav className="flex gap-1 mt-1 sm:mt-0">
