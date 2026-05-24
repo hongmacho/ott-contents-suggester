@@ -246,7 +246,9 @@ export function CurationApp() {
   }
 
   function handleWatched(contentId: number, contentType: string) {
-    setWatchedSet((prev) => new Set([...prev, watchedKey(contentId, contentType)]))
+    const key = watchedKey(contentId, contentType)
+    setWatchedSet((prev) => new Set([...prev, key]))
+    setContents((prev) => prev.filter((c) => watchedKey(c.contentId, c.contentType) !== key))
   }
 
   function handleUnwatched(contentId: number, contentType: string) {
