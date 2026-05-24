@@ -154,7 +154,7 @@ export function CurationApp() {
       const json = await res.json()
       if (json.success) {
         setContents(json.data)
-        setHasMore(json.data.length >= 12)
+        setHasMore(json.hasMore ?? json.data.length >= 12)
       }
     } finally {
       setLoading(false)
@@ -177,7 +177,7 @@ export function CurationApp() {
           return [...prev, ...fresh]
         })
         pageRef.current = nextPage
-        setHasMore(json.data.length >= 12)
+        setHasMore(json.hasMore ?? json.data.length >= 12)
       } else {
         setHasMore(false)
       }

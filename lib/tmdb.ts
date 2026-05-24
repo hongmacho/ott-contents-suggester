@@ -189,7 +189,7 @@ export async function discoverContent(params: {
   excludeAnimation?: boolean
   watchedIds: number[]
   page?: number
-}): Promise<Omit<CuratedContent, 'recommendationReason'>[]> {
+}): Promise<{ items: Omit<CuratedContent, 'recommendationReason'>[]; hasMore: boolean }> {
   const { category, providerIds, yearFrom, yearTo, originLanguages, excludeAnimation = false, watchedIds, page = 1 } = params
   const config = CATEGORY_CONFIG[category]
   const apiKey = process.env.TMDB_API_KEY
@@ -261,12 +261,14 @@ export async function discoverContent(params: {
     }
   }
 
+  const rawItems = [...merged.values()]
+
   // Post-filter: apply language filter (handles 'other' and dedup from no-lang-filter fetches)
   const pool = originLanguages.length > 0
-    ? [...merged.values()].filter(({ item }) =>
+    ? rawItems.filter(({ item }) =>
         originLanguages.some((lang) => matchesLanguage(item.original_language, lang))
       )
-    : [...merged.values()]
+    : rawItems
 
   // Score all items (pure Bayesian)
   const scored = pool.map(({ item, providers }) => ({
@@ -328,7 +330,24 @@ export async function discoverContent(params: {
     })
   )
 
-  return top12.map(({ item, providers }) => {
+  // pool이 12개 미만이면 다음 TMDB 페이지에 결과가 있는지 probe
+  let hasMore = pool.length >= 12
+  if (!hasMore && rawItems.length > 0) {
+    const probeResults = await Promise.all(
+      effectiveProviders.slice(0, 1).flatMap((providerId) =>
+        langParamSets.slice(0, 1).map((langParams) =>
+          fetchDiscover(
+            config.endpoint,
+            { ...baseParams, ...langParams, with_watch_providers: String(providerId) },
+            page + 1
+          )
+        )
+      )
+    )
+    hasMore = probeResults.some((items) => items.length > 0)
+  }
+
+  const items = top12.map(({ item, providers }) => {
     const detail = detailMap.get(item.id)
     return {
       contentId: item.id,
@@ -347,6 +366,8 @@ export async function discoverContent(params: {
       awards: detail?.awards?.length ? detail.awards : undefined,
     }
   })
+
+  return { items, hasMore }
 }
 
 export function tmdbImageUrl(path: string | null, size = 'w500'): string | null {

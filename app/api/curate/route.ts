@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const excludedIds = [...new Set([...watched.map((w) => w.contentId), ...skipped.map((s) => s.contentId)])]
 
-    const contents = await discoverContent({
+    const { items, hasMore } = await discoverContent({
       category,
       providerIds,
       yearFrom,
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     })
 
     const withReasons = await Promise.all(
-      contents.map(async (content) => ({
+      items.map(async (content) => ({
         ...content,
         recommendationReason: await generateRecommendationReason({
           title: content.title,
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       }))
     )
 
-    return NextResponse.json({ success: true, data: withReasons })
+    return NextResponse.json({ success: true, data: withReasons, hasMore })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
