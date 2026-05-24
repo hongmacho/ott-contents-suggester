@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { signOut } from 'next-auth/react'
 import type { CuratedContent, Category, OriginLanguage } from '@/lib/tmdb'
 import { CategoryTabs } from './CategoryTabs'
 import { OttFilterBar } from './OttFilterBar'
 import { YearRangeSlider } from './YearRangeSlider'
 import { CountryFilter } from './CountryFilter'
 import { ContentCard } from './ContentCard'
-
 import { ExcludedPage } from './ExcludedPage'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -36,7 +36,13 @@ function watchedKey(contentId: number, contentType: string) {
   return `${contentType}:${contentId}`
 }
 
-export function CurationApp() {
+interface UserInfo {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
+
+export function CurationApp({ user }: { user: UserInfo | null }) {
   const [view, setView] = useState<'main' | 'excluded'>('main')
   const [category, setCategory] = useState<Category>('drama')
   const [ottPlatforms, setOttPlatforms] = useState<number[]>([])
@@ -298,10 +304,28 @@ export function CurationApp() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
-          <span className="text-lg font-black tracking-widest text-amber-400 shrink-0">HONGCHA</span>
+        <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:gap-3">
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-black tracking-widest text-amber-400 shrink-0">HONGCHA</span>
+            <div className="ml-auto hidden sm:flex items-center gap-2">
+              {user?.image && (
+                <img
+                  src={user.image}
+                  alt={user.name ?? '사용자'}
+                  className="w-7 h-7 rounded-full"
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                로그아웃
+              </button>
+            </div>
+          </div>
 
-          <nav className="flex gap-1">
+          <nav className="flex gap-1 mt-1 sm:mt-0">
             <button
               onClick={() => setView('main')}
               className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
@@ -323,7 +347,6 @@ export function CurationApp() {
               제외됨{excludedCount > 0 ? ` [${excludedCount}]` : ''}
             </button>
           </nav>
-
         </div>
       </header>
 

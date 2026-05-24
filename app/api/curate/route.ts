@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrCreateSession } from '@/lib/session'
+import { getRequiredUserId } from '@/lib/auth-session'
 import { getDb } from '@/lib/db'
 import { watchedContents, skippedContents } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
@@ -35,13 +35,13 @@ export async function GET(request: NextRequest) {
     const excludeAnimation = excludeAnimationParam === '1'
     const page = pageParam ? Math.max(1, parseInt(pageParam)) : 1
 
-    const { sessionId } = await getOrCreateSession()
+    const userId = await getRequiredUserId()
     const db = getDb()
 
-    const [watched, skipped] = [
-      db.select({ contentId: watchedContents.contentId }).from(watchedContents).where(eq(watchedContents.sessionId, sessionId)).all(),
-      db.select({ contentId: skippedContents.contentId }).from(skippedContents).where(eq(skippedContents.sessionId, sessionId)).all(),
-    ]
+    const [watched, skipped] = await Promise.all([
+      db.select({ contentId: watchedContents.contentId }).from(watchedContents).where(eq(watchedContents.sessionId, userId)),
+      db.select({ contentId: skippedContents.contentId }).from(skippedContents).where(eq(skippedContents.sessionId, userId)),
+    ])
 
     const excludedIds = [...new Set([...watched.map((w) => w.contentId), ...skipped.map((s) => s.contentId)])]
 
@@ -71,6 +71,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: withReasons, hasMore })
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }

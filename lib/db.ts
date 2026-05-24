@@ -1,6 +1,5 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import path from 'path'
+import { neon } from '@neondatabase/serverless'
+import { drizzle } from 'drizzle-orm/neon-http'
 import * as schema from './schema'
 
 declare global {
@@ -9,50 +8,9 @@ declare global {
 }
 
 function createDrizzle() {
-  const dbPath = path.resolve(process.env.DATABASE_URL ?? './data/ott-contents.db')
-  const sqlite = new Database(dbPath)
-  sqlite.pragma('journal_mode = WAL')
-
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS sessions (
-      id TEXT PRIMARY KEY,
-      created_at INTEGER NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS watched_contents (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT NOT NULL,
-      content_id INTEGER NOT NULL,
-      content_type TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE(session_id, content_id, content_type)
-    );
-    CREATE TABLE IF NOT EXISTS skipped_contents (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT NOT NULL,
-      content_id INTEGER NOT NULL,
-      content_type TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE(session_id, content_id, content_type)
-    );
-    CREATE TABLE IF NOT EXISTS preferences (
-      session_id TEXT PRIMARY KEY,
-      ott_platforms TEXT NOT NULL DEFAULT '[]',
-      year_from INTEGER,
-      year_to INTEGER,
-      origin_languages TEXT NOT NULL DEFAULT '[]',
-      updated_at INTEGER NOT NULL
-    );
-  `)
-
-  // migrate existing tables
-  try { sqlite.exec(`ALTER TABLE preferences ADD COLUMN origin_languages TEXT NOT NULL DEFAULT '[]'`) } catch { /* already exists */ }
-  try { sqlite.exec(`ALTER TABLE preferences ADD COLUMN exclude_animation INTEGER NOT NULL DEFAULT 0`) } catch { /* already exists */ }
-  try { sqlite.exec(`ALTER TABLE watched_contents ADD COLUMN title TEXT NOT NULL DEFAULT ''`) } catch { /* already exists */ }
-  try { sqlite.exec(`ALTER TABLE watched_contents ADD COLUMN poster_path TEXT`) } catch { /* already exists */ }
-  try { sqlite.exec(`ALTER TABLE skipped_contents ADD COLUMN title TEXT NOT NULL DEFAULT ''`) } catch { /* already exists */ }
-  try { sqlite.exec(`ALTER TABLE skipped_contents ADD COLUMN poster_path TEXT`) } catch { /* already exists */ }
-
-  return drizzle(sqlite, { schema })
+  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL not configured')
+  const sql = neon(process.env.DATABASE_URL)
+  return drizzle(sql, { schema })
 }
 
 export function getDb() {

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrCreateSession } from '@/lib/session'
+import { getRequiredUserId } from '@/lib/auth-session'
 import { getDb } from '@/lib/db'
 import { watchedContents } from '@/lib/schema'
 import { eq, and } from 'drizzle-orm'
 
 export async function GET() {
   try {
-    const { sessionId } = await getOrCreateSession()
+    const userId = await getRequiredUserId()
     const db = getDb()
 
-    const watched = db
+    const watched = await db
       .select({
         contentId: watchedContents.contentId,
         contentType: watchedContents.contentType,
@@ -17,11 +17,13 @@ export async function GET() {
         posterPath: watchedContents.posterPath,
       })
       .from(watchedContents)
-      .where(eq(watchedContents.sessionId, sessionId))
-      .all()
+      .where(eq(watchedContents.sessionId, userId))
 
     return NextResponse.json({ success: true, data: watched })
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
@@ -36,23 +38,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '필수 파라미터 누락' }, { status: 400 })
     }
 
-    const { sessionId } = await getOrCreateSession()
+    const userId = await getRequiredUserId()
     const db = getDb()
 
-    db.insert(watchedContents)
+    await db
+      .insert(watchedContents)
       .values({
-        sessionId,
+        sessionId: userId,
         contentId: Number(contentId),
         contentType: String(contentType),
         title: String(title ?? ''),
         posterPath: posterPath ? String(posterPath) : null,
-        createdAt: Date.now(),
+        createdAt: Math.floor(Date.now() / 1000),
       })
       .onConflictDoNothing()
-      .run()
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
@@ -68,21 +73,24 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: '필수 파라미터 누락' }, { status: 400 })
     }
 
-    const { sessionId } = await getOrCreateSession()
+    const userId = await getRequiredUserId()
     const db = getDb()
 
-    db.delete(watchedContents)
+    await db
+      .delete(watchedContents)
       .where(
         and(
-          eq(watchedContents.sessionId, sessionId),
+          eq(watchedContents.sessionId, userId),
           eq(watchedContents.contentId, contentId),
           eq(watchedContents.contentType, contentType)
         )
       )
-      .run()
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrCreateSession } from '@/lib/session'
+import { getRequiredUserId } from '@/lib/auth-session'
 import { getDb } from '@/lib/db'
 import { preferences } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 
 export async function GET() {
   try {
-    const { sessionId } = await getOrCreateSession()
+    const userId = await getRequiredUserId()
     const db = getDb()
 
-    const pref = db
+    const [pref] = await db
       .select()
       .from(preferences)
-      .where(eq(preferences.sessionId, sessionId))
-      .get()
+      .where(eq(preferences.sessionId, userId))
+      .limit(1)
 
     if (!pref) {
       return NextResponse.json({
@@ -29,10 +29,13 @@ export async function GET() {
         yearFrom: pref.yearFrom,
         yearTo: pref.yearTo,
         originLanguages: JSON.parse(pref.originLanguages ?? '[]') as string[],
-        excludeAnimation: pref.excludeAnimation === 1,
+        excludeAnimation: pref.excludeAnimation,
       },
     })
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
@@ -45,14 +48,15 @@ export async function POST(request: NextRequest) {
     const yearFrom: number | null = body.yearFrom ?? null
     const yearTo: number | null = body.yearTo ?? null
     const originLanguages: string[] = Array.isArray(body.originLanguages) ? body.originLanguages : []
-    const excludeAnimation: number = body.excludeAnimation ? 1 : 0
+    const excludeAnimation: boolean = Boolean(body.excludeAnimation)
 
-    const { sessionId } = await getOrCreateSession()
+    const userId = await getRequiredUserId()
     const db = getDb()
 
-    db.insert(preferences)
+    await db
+      .insert(preferences)
       .values({
-        sessionId,
+        sessionId: userId,
         ottPlatforms: JSON.stringify(ottPlatforms),
         yearFrom,
         yearTo,
@@ -71,10 +75,12 @@ export async function POST(request: NextRequest) {
           updatedAt: Date.now(),
         },
       })
-      .run()
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const message = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
