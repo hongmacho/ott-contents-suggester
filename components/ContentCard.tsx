@@ -235,6 +235,25 @@ export function ContentCard({ content, isWatched, onWatched, onUnwatched, onSkip
             ))}
           </div>
         )}
+
+        {/* Mobile-only: director / cast / overview */}
+        <div className="md:hidden space-y-1 pt-1 border-t border-zinc-800">
+          {content.director && (
+            <p className="text-xs text-zinc-400 leading-snug">
+              <span className="text-zinc-600">연출</span> {content.director}
+            </p>
+          )}
+          {content.cast.length > 0 && (
+            <p className="text-xs text-zinc-400 leading-snug">
+              <span className="text-zinc-600">출연</span> {content.cast.join(', ')}
+            </p>
+          )}
+          {content.overview && (
+            <p className="text-xs text-zinc-500 leading-relaxed line-clamp-3">
+              {content.overview}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

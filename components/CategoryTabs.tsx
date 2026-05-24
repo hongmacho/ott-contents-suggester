@@ -1,6 +1,6 @@
 'use client'
 
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 import type { Category } from '@/lib/tmdb'
 
 interface CategoryTabsProps {
@@ -17,19 +17,25 @@ const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
 
 export function CategoryTabs({ value, onChange }: CategoryTabsProps) {
   return (
-    <Tabs value={value} onValueChange={(v) => onChange(v as Category)}>
-      <TabsList className="bg-zinc-900 border border-zinc-800 p-1 h-auto gap-1 w-full sm:w-auto">
+    <div className="space-y-1.5">
+      <span className="text-xs text-zinc-500">카테고리</span>
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {CATEGORIES.map((cat) => (
-          <TabsTrigger
+          <button
             key={cat.value}
-            value={cat.value}
-            className="flex-1 sm:flex-none data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:font-semibold text-zinc-400 hover:text-white transition-colors px-3 sm:px-4 py-2 text-sm rounded-md"
+            onClick={() => onChange(cat.value)}
+            className={cn(
+              'shrink-0 h-8 px-3.5 text-xs font-semibold rounded-full border transition-all duration-200',
+              value === cat.value
+                ? 'bg-amber-500 border-amber-500 text-black'
+                : 'bg-transparent border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-300'
+            )}
           >
-            <span className="mr-1.5">{cat.emoji}</span>
+            <span className="mr-1">{cat.emoji}</span>
             {cat.label}
-          </TabsTrigger>
+          </button>
         ))}
-      </TabsList>
-    </Tabs>
+      </div>
+    </div>
   )
 }

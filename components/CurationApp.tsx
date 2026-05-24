@@ -12,6 +12,25 @@ import { ExcludedPage } from './ExcludedPage'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const PREF_SAVE_DEBOUNCE_MS = 600
+const PREF_STORAGE_KEY = 'hongcha_prefs'
+
+interface StoredPrefs {
+  category?: Category
+  ottPlatforms?: number[]
+  yearFrom?: number | null
+  yearTo?: number | null
+  originLanguages?: OriginLanguage[]
+  excludeAnimation?: boolean
+}
+
+function loadStoredPrefs(): StoredPrefs | null {
+  try {
+    const raw = localStorage.getItem(PREF_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as StoredPrefs) : null
+  } catch {
+    return null
+  }
+}
 
 function watchedKey(contentId: number, contentType: string) {
   return `${contentType}:${contentId}`
@@ -42,7 +61,36 @@ export function CurationApp() {
   }, [category, ottPlatforms, yearRange, originLanguages, excludeAnimation])
 
   useEffect(() => {
+    if (!prefLoaded) return
+    try {
+      localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify({
+        category,
+        ottPlatforms,
+        yearFrom: yearRange?.[0] ?? null,
+        yearTo: yearRange?.[1] ?? null,
+        originLanguages,
+        excludeAnimation,
+      } satisfies StoredPrefs))
+    } catch {
+      // private mode 등 storage 불가 환경 무시
+    }
+  }, [category, ottPlatforms, yearRange, originLanguages, excludeAnimation, prefLoaded])
+
+  useEffect(() => {
     async function init() {
+      // 1. localStorage에서 즉시 복원
+      const stored = loadStoredPrefs()
+      if (stored) {
+        if (stored.category) setCategory(stored.category)
+        if (stored.ottPlatforms?.length) setOttPlatforms(stored.ottPlatforms)
+        if (stored.yearFrom != null && stored.yearTo != null) setYearRange([stored.yearFrom, stored.yearTo])
+        if (Array.isArray(stored.originLanguages) && stored.originLanguages.length) {
+          setOriginLanguages(stored.originLanguages as OriginLanguage[])
+        }
+        if (stored.excludeAnimation) setExcludeAnimation(true)
+      }
+
+      // 2. 서버에서 watched/skipped + 필터 fallback 로드
       const [prefRes, watchedRes, skippedRes] = await Promise.all([
         fetch('/api/preferences'),
         fetch('/api/watched'),
@@ -54,7 +102,8 @@ export function CurationApp() {
         skippedRes.json(),
       ])
 
-      if (prefJson.success && prefJson.data) {
+      // localStorage가 없을 때만 서버 필터값 사용
+      if (!stored && prefJson.success && prefJson.data) {
         const { ottPlatforms: saved, yearFrom, yearTo, originLanguages: savedLangs, excludeAnimation: savedExcludeAnim } = prefJson.data
         if (saved?.length) setOttPlatforms(saved)
         if (yearFrom != null && yearTo != null) setYearRange([yearFrom, yearTo])
@@ -249,13 +298,13 @@ export function CurationApp() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
-          <span className="text-xl font-black tracking-widest text-amber-400 shrink-0">HONGCHA</span>
+        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
+          <span className="text-lg font-black tracking-widest text-amber-400 shrink-0">HONGCHA</span>
 
-          <nav className="flex gap-1 flex-1">
+          <nav className="flex gap-1">
             <button
               onClick={() => setView('main')}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 view === 'main'
                   ? 'bg-zinc-800 text-white'
                   : 'text-zinc-400 hover:text-white'
@@ -265,7 +314,7 @@ export function CurationApp() {
             </button>
             <button
               onClick={() => setView('excluded')}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 view === 'excluded'
                   ? 'bg-zinc-800 text-white'
                   : 'text-zinc-400 hover:text-white'
@@ -285,7 +334,7 @@ export function CurationApp() {
         />
       ) : (
         <>
-          <div className="max-w-6xl mx-auto px-4 pt-6 pb-4 space-y-4">
+          <div className="max-w-6xl mx-auto px-4 pt-4 pb-3 space-y-3">
             <CategoryTabs value={category} onChange={setCategory} />
             <OttFilterBar selected={ottPlatforms} onChange={handleOttChange} />
             <CountryFilter value={originLanguages} onChange={handleOriginLanguagesChange} />
@@ -308,7 +357,7 @@ export function CurationApp() {
 
           <main className="max-w-6xl mx-auto px-4 pb-12">
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {skeletons.map((_, i) => (
                   <div key={i} className="rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
                     <Skeleton className="aspect-[2/3] bg-zinc-800" />
@@ -327,7 +376,7 @@ export function CurationApp() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {contents.map((content) => (
                     <ContentCard
                       key={`${content.contentType}:${content.contentId}`}

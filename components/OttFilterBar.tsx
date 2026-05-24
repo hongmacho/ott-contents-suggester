@@ -26,35 +26,37 @@ export function OttFilterBar({ selected, onChange }: OttFilterBarProps) {
   }
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-sm text-zinc-500 shrink-0">OTT 플랫폼</span>
-      {OTT_LIST.map(({ id, label }) => {
-        const isActive = selected.includes(id)
-        const provider = OTT_PROVIDERS[id]
-        return (
-          <Toggle
-            key={id}
-            pressed={isActive}
-            onPressedChange={() => toggle(id)}
-            className={cn(
-              'h-9 px-4 text-sm font-semibold rounded-full border transition-all duration-200',
-              'data-[state=off]:bg-transparent data-[state=off]:text-zinc-400 data-[state=off]:border-zinc-700 data-[state=off]:hover:border-zinc-500',
-              'data-[state=on]:text-white data-[state=on]:border-transparent'
-            )}
-            style={isActive ? { backgroundColor: provider?.color } : undefined}
+    <div className="space-y-1.5">
+      <span className="text-xs text-zinc-500">OTT 플랫폼</span>
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {OTT_LIST.map(({ id, label }) => {
+          const isActive = selected.includes(id)
+          const provider = OTT_PROVIDERS[id]
+          return (
+            <Toggle
+              key={id}
+              pressed={isActive}
+              onPressedChange={() => toggle(id)}
+              className={cn(
+                'shrink-0 h-8 px-3.5 text-xs font-semibold rounded-full border transition-all duration-200',
+                'data-[state=off]:bg-transparent data-[state=off]:text-zinc-400 data-[state=off]:border-zinc-700 data-[state=off]:hover:border-zinc-500',
+                'data-[state=on]:text-white data-[state=on]:border-transparent'
+              )}
+              style={isActive ? { backgroundColor: provider?.color } : undefined}
+            >
+              {label}
+            </Toggle>
+          )
+        })}
+        {selected.length > 0 && (
+          <button
+            onClick={() => onChange([])}
+            className="shrink-0 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
           >
-            {label}
-          </Toggle>
-        )
-      })}
-      {selected.length > 0 && (
-        <button
-          onClick={() => onChange([])}
-          className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors ml-1"
-        >
-          전체
-        </button>
-      )}
+            전체
+          </button>
+        )}
+      </div>
     </div>
   )
 }
