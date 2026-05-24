@@ -208,8 +208,7 @@ export async function discoverContent(params: {
     language: 'ko-KR',
     sort_by: 'popularity.desc',
     watch_region: 'KR',
-    'vote_average.gte': '6.5',
-    'vote_count.gte': '50',
+
   }
 
   if (excludeAnimation) baseParams['without_genres'] = '16'
