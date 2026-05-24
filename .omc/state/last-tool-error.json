@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"npm run lint 2>&1 && npm run build 2>&1\",\"timeout\":180000,\"description\":\"lint + 프로덕션 빌드\"}",
+  "error": "Exit code 1\nnpm error Missing script: \"lint\"\nnpm error\nnpm error Did you mean this?\nnpm error   npm link # Symlink a package folder\nnpm error\nnpm error To see a list of scripts, run:\nnpm error   npm run\nnpm error A complete log of this run can be found in: /Users/hongpaul/.npm/_logs/2026-05-24T16_08_12_064Z-debug-0.log",
+  "timestamp": "2026-05-24T16:08:12.839Z",
+  "retry_count": 3
+}
