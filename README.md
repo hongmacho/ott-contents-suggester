@@ -2,6 +2,9 @@
 
 > 넷플릭스, 티빙, 디즈니+, 웨이브에서 지금 볼 만한 콘텐츠를 큐레이션해드립니다.
 
+
+<img width="1339" height="931" alt="image" src="https://github.com/user-attachments/assets/6bf518fe-dc29-48ae-a65b-b8a2a8566521" />
+
 ## Features
 
 - 드라마 · 영화 · 예능 · 다큐멘터리 카테고리별 탐색
